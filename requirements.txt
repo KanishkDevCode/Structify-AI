@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+opencv-python
+numpy
+pillow
+shapely
+geojson
+trimesh[all]
+ultralytics
+python-multipart
