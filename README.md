@@ -1,100 +1,77 @@
-Sure. Below is a clean, **emoji-free**, single `README.md` script that you can directly copy-paste into your repository:
 
----
-
-```markdown
 # Structify AI - Floorplan to 3D Scene Converter
 
-Structify AI is a FastAPI-based backend application that transforms 2D floorplan images into segmentation maps, labeled GeoJSON polygons, and a 3D `.glb` scene. It integrates deep learning (YOLOv8), image processing (OpenCV), geometry handling (Shapely), and 3D mesh generation (Trimesh).
+Structify AI is a FastAPI-based backend application that transforms 2D floorplan images into annotated segmentation maps, labeled GeoJSON files, and a 3D `.glb` model. It combines YOLO-based instance segmentation, OpenCV preprocessing, Shapely polygon processing, and trimesh 3D scene generation into a single API endpoint.
 
 ## Features
 
-- Detects and segments walls, rooms, and furniture using pretrained YOLOv8 models
+- Detects and segments walls, rooms, and furniture from a floorplan image
 - Generates:
   - Annotated detection images
-  - Class-wise binary masks
-  - GeoJSON with labeled polygons
-  - Composite segmentation overlay
-  - Exported 3D GLB model
-- Supports per-class confidence thresholds as input
-- Automatically places and scales 3D furniture models based on polygon geometry
-- Returns all results in a downloadable ZIP file
+  - Binary class-wise masks
+  - Composite overlay image
+  - GeoJSON file with per-instance polygon labeling
+  - GLB 3D model with extruded rooms and placed furniture
+- Adjustable confidence thresholds per class
+- Packaged into a downloadable ZIP file
 
-## Models Used
+## Models and Assets
 
-- `wall_segmentor.pt`: for wall segmentation
-- `image_segmentor.pt`: for rooms and furniture segmentation
-
-These models must be located at:
-```
-
-/content/drive/MyDrive/Trained\_Model/
-
-```
-
-## Directory Structure
-
-```
-
-/content/drive/MyDrive/
-├── Trained\_Model/
-│   ├── wall\_segmentor.pt
-│   └── image\_segmentor.pt
-├── 3D Models/
-│   ├── bed.glb
-│   ├── wardrobe.glb
-│   ├── commode.glb
-│   └── door.glb
-
-````
+Trained YOLOv8 models and 3D GLB files must be placed in the following paths:
 
 ## Supported Classes
 
 ### Room Classes
-- Bedroom, Dining Room, Foyer, Kitchen, Living Room, Terrace, attachBedroom, Balcony, garage, lobby, study, toilet, utility, walkin
+Bedroom, Dining Room, Foyer, Kitchen, Living Room, Terrace, attachBedroom, Balcony, garage, lobby, study, toilet, utility, walkin
 
 ### Object Classes
-- Bed, Dining table, Sofa, Wardrobe, commode, door, duct, fridge, sink, stove, tv, washing-machine, etc.
+Bed, Dining table, Sofa, Wardrobe, commode, door, duct, fridge, sink, stove, tv, washing-machine, etc.
 
 ## API Endpoint
 
-### `POST /process`
+### POST /process
 
-Processes a floorplan image and returns a ZIP with:
-- wall_detection_annotated.jpg
-- room_detection_annotated.jpg
-- object_detection_annotated.jpg
-- composite_overlay.jpg
-- polygons_output.geojson
-- floorplan_scene_final.glb
+Accepts a floorplan image and returns a ZIP archive containing detection images, masks, overlay, GeoJSON, and 3D model.
 
-#### Parameters
-- `image` (file): required JPEG or PNG floorplan
-- Optional float form fields for thresholding:
-  - `bedroom`, `kitchen`, `bed`, `sofa`, `wardrobe`, `door`, `wall`, etc.
+### Request Parameters (multipart/form-data)
 
-#### Example curl command
+- `image` (required): Floorplan image file (JPEG or PNG)
+- Optional form fields for confidence threshold override:
+  - `bedroom`, `kitchen`, `living_room`, `toilet`, `bed`, `sofa`, `wardrobe`, `commode`, `door`, `wall`
+
+### Example (using curl)
+
 ```bash
 curl -X POST http://localhost:8000/process \
   -F image=@floorplan.jpg \
-  -F bedroom=0.6 -F wall=0.5 -F bed=0.5 --output structify_output.zip
+  -F bedroom=0.6 -F bed=0.5 -F wall=0.7 \
+  --output structify_output.zip
 ````
 
-## Dependencies
+### ZIP Output Includes:
 
-Install required packages:
+* wall\_detection\_annotated.jpg
+* room\_detection\_annotated.jpg
+* object\_detection\_annotated.jpg
+* composite\_overlay.jpg
+* polygons\_output.geojson
+* floorplan\_scene\_final.glb
+
+## Installation
+
+Install all dependencies:
 
 ```bash
 pip install fastapi uvicorn opencv-python shapely geojson trimesh[all] ultralytics
 ```
 
-## Running the App
+## Run Locally
 
 ```bash
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-If you want public access:
+## Optional: Expose via ngrok
 
 ```bash
 ngrok http 8000
@@ -107,10 +84,3 @@ This project is licensed under the MIT License.
 ## Author
 
 Kanishk Singh
-
-```
-
----
-
-Let me know if you want a separate `requirements.txt` or example frontend code to connect with this backend.
-```
